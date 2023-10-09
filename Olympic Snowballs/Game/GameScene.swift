@@ -14,6 +14,8 @@ class GameScene: SKScene {
     var zeusMove = SKSpriteNode()
     var arrayNode: [SKSpriteNode] = []
     var arrayHadesActive: [SKSpriteNode] = []
+    var arrayShot: [SKSpriteNode] = []
+    var arrayHadesDead: [SKSpriteNode] = []
     
     let zeusNodeOne = SKSpriteNode(imageNamed: NameImage.zeusFirstPosition.rawValue)
     var isZeusNodeOneTouched: Bool = false
@@ -33,20 +35,23 @@ class GameScene: SKScene {
     var nameDeadHades: String = ""
     var isEnd: Bool = false
     
+    let animationZeusShot: [SKTexture] = [SKTexture(imageNamed: NameImage.zeusFirstPosition.rawValue), SKTexture(imageNamed: NameImage.zeusSecondPosition.rawValue), SKTexture(imageNamed: NameImage.zeusThirdPosition.rawValue), SKTexture(imageNamed: NameImage.zeusFirstPosition.rawValue)]
+    
+    let animationHadesShot: [SKTexture] = [SKTexture(imageNamed: NameImage.hadesFirstPosition.rawValue), SKTexture(imageNamed: NameImage.hadesSecondPosition.rawValue), SKTexture(imageNamed: NameImage.hadesThirdPosition.rawValue), SKTexture(imageNamed: NameImage.hadesFirstPosition.rawValue)]
+    
     override func didMove(to view: SKView) {
         backgraundNode.position = CGPoint(x: 0, y: 0)
         backgraundNode.size = CGSize(width: frame.width, height: frame.height)
         addChild(backgraundNode)
-        
+        addChild(zeusNodeOne)
+        addChild(zeusNodeTwo)
+        addChild(zeusNodeThree)
+
         createDefWall()
-        createZueses()
-        createHades(numberOfHades: 3)
-        moveHades()
-        
+
         view.scene?.delegate = self
         physicsWorld.contactDelegate = self
     }
-    
     
     //MARK: - Touches методы
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -78,14 +83,17 @@ class GameScene: SKScene {
     }
     
     public func startGame() {
-//        restartZeus()
-//        createHades(numberOfHades: 3)
-//        moveHades()
+        createZueses()
+        createHades(numberOfHades: 3)
+        moveHades()
+
     }
     
     //MARK: - Настройки зевса
+ 
     private func createZueses() {
         
+        zeusNodeOne.texture = SKTexture(imageNamed: NameImage.zeusFirstPosition.rawValue)
         zeusNodeOne.size = CGSize(width: 45, height: 55)
         zeusNodeOne.position = CGPoint(x: frame.minX / 2, y: frame.minY / 2 + 50)
         zeusNodeOne.physicsBody = SKPhysicsBody(rectangleOf: zeusNodeOne.size)
@@ -96,9 +104,9 @@ class GameScene: SKScene {
         zeusNodeOne.physicsBody?.contactTestBitMask = UInt32(BodyType.hadesGun)
         
         zeusNodeOne.name = PlayerName.zeusNumberOne.rawValue
-
-        addChild(zeusNodeOne)
+        isZeusNodeOneDead = false
         
+        zeusNodeTwo.texture = SKTexture(imageNamed: NameImage.zeusFirstPosition.rawValue)
         zeusNodeTwo.size = CGSize(width: 45, height: 55)
         zeusNodeTwo.position = CGPoint(x: frame.minX / 2, y: frame.minY / 2)
         zeusNodeTwo.physicsBody = SKPhysicsBody(rectangleOf: zeusNodeTwo.size)
@@ -109,9 +117,9 @@ class GameScene: SKScene {
         zeusNodeTwo.physicsBody?.contactTestBitMask = UInt32(BodyType.hadesGun)
         
         zeusNodeTwo.name = PlayerName.zeusNumberTwo.rawValue
-
-        addChild(zeusNodeTwo)
+        isZeusNodeTwoDead = false
         
+        zeusNodeThree.texture = SKTexture(imageNamed: NameImage.zeusFirstPosition.rawValue)
         zeusNodeThree.size = CGSize(width: 45, height: 55)
         zeusNodeThree.position = CGPoint(x: frame.minX / 2, y: frame.minY / 2 - 50)
         zeusNodeThree.physicsBody = SKPhysicsBody(rectangleOf: zeusNodeThree.size)
@@ -122,26 +130,11 @@ class GameScene: SKScene {
         zeusNodeThree.physicsBody?.contactTestBitMask = UInt32(BodyType.hadesGun)
         
         zeusNodeThree.name = PlayerName.zeusNumberThree.rawValue
-
-        addChild(zeusNodeThree)
-    }
-    
-    private func restartZeus() {
-        zeusNodeOne.texture = SKTexture(imageNamed: NameImage.zeusFirstPosition.rawValue)
-        zeusNodeOne.size = CGSize(width: 45, height: 55)
-        zeusNodeOne.position = CGPoint(x: frame.minX / 2, y: frame.minY / 2 + 50)
-        isZeusNodeOneDead = false
         
-        zeusNodeTwo.texture = SKTexture(imageNamed: NameImage.zeusFirstPosition.rawValue)
-        zeusNodeTwo.size = CGSize(width: 45, height: 55)
-        zeusNodeTwo.position = CGPoint(x: frame.minX / 2, y: frame.minY / 2)
-        isZeusNodeTwoDead = false
-        
-        zeusNodeThree.texture = SKTexture(imageNamed: NameImage.zeusFirstPosition.rawValue)
-        zeusNodeThree.size = CGSize(width: 45, height: 55)
-        zeusNodeThree.position = CGPoint(x: frame.minX / 2, y: frame.minY / 2 - 50)
         isZeusNodeThreeDead = false
         isEnd = false
+        arrayNode = []
+        arrayHadesActive = []
 
     }
     
@@ -199,7 +192,8 @@ class GameScene: SKScene {
         let waitForViewAction = SKAction.wait(forDuration: 1)
         let sequance = SKAction.sequence([waitForViewAction, actionMain])
         
-        self.run(SKAction.repeatForever(sequance))
+        self.run(SKAction.repeatForever(sequance), withKey: "forever")
+        
     }
     
     //MARK: - Создание защитных стен
@@ -234,39 +228,43 @@ class GameScene: SKScene {
     
     //MARK: - Атака игрока
     private func attackZeus(zeus: SKSpriteNode) {
-        
-        let shot = SKSpriteNode(imageNamed: NameImage.gunZues.rawValue)
-        shot.size = CGSize(width: 50, height: 20)
-        shot.position = zeus.position
+        if zeus.position.x != 0.0 && zeus.position.y != 0.0 {
+            let shot = SKSpriteNode(imageNamed: NameImage.gunZues.rawValue)
+            shot.size = CGSize(width: 50, height: 20)
+            
+            shot.position = zeus.position
+            
+            shot.physicsBody = SKPhysicsBody(circleOfRadius: 5)
+            shot.physicsBody?.isDynamic = true
+            shot.physicsBody?.affectedByGravity = false
+            
+            shot.physicsBody?.categoryBitMask = UInt32(BodyType.zeusGun)
+            shot.physicsBody?.collisionBitMask = UInt32(BodyType.hades)
+            shot.physicsBody?.contactTestBitMask = UInt32(BodyType.hades)
+            shot.physicsBody?.collisionBitMask = UInt32(BodyType.hadesGun)
+            shot.physicsBody?.contactTestBitMask = UInt32(BodyType.hadesGun)
+            shot.physicsBody?.collisionBitMask = UInt32(BodyType.wallZeus)
+            shot.physicsBody?.contactTestBitMask = UInt32(BodyType.wallZeus)
+            shot.physicsBody?.collisionBitMask = UInt32(BodyType.wallHades)
+            shot.physicsBody?.contactTestBitMask = UInt32(BodyType.wallHades)
+            
+            shot.physicsBody?.usesPreciseCollisionDetection = true
+            
+            self.addChild(shot)
+            
+            let animationDuration: TimeInterval = 3
+            
+            var actionArray = [SKAction]()
+            
+            let walkAnimation = SKAction.animate(with: animationZeusShot,
+                                                 timePerFrame: 0.07)
 
-        shot.physicsBody = SKPhysicsBody(circleOfRadius: 5)
-        shot.physicsBody?.isDynamic = true
-        shot.physicsBody?.affectedByGravity = false
-        
-        shot.physicsBody?.categoryBitMask = UInt32(BodyType.zeusGun)
-        shot.physicsBody?.collisionBitMask = UInt32(BodyType.hades)
-        shot.physicsBody?.contactTestBitMask = UInt32(BodyType.hades)
-        shot.physicsBody?.collisionBitMask = UInt32(BodyType.hadesGun)
-        shot.physicsBody?.contactTestBitMask = UInt32(BodyType.hadesGun)
-        shot.physicsBody?.collisionBitMask = UInt32(BodyType.wallZeus)
-        shot.physicsBody?.contactTestBitMask = UInt32(BodyType.wallZeus)
-        shot.physicsBody?.collisionBitMask = UInt32(BodyType.wallHades)
-        shot.physicsBody?.contactTestBitMask = UInt32(BodyType.wallHades)
-
-        shot.physicsBody?.usesPreciseCollisionDetection = true
-        
-        self.addChild(shot)
-        
-        let animationDuration: TimeInterval = 3
-        
-        var actionArray = [SKAction]()
-        
-        
-        
-        actionArray.append(SKAction.move(to: CGPoint(x: self.frame.size.width, y: zeus.position.y), duration: animationDuration))
-        actionArray.append(SKAction.removeFromParent())
-        
-        shot.run(SKAction.sequence(actionArray))
+            zeus.run(walkAnimation)
+            actionArray.append(SKAction.move(to: CGPoint(x: self.frame.size.width, y: zeus.position.y), duration: animationDuration))
+            actionArray.append(SKAction.removeFromParent())
+            
+            shot.run(SKAction.sequence(actionArray))
+        }
     }
     
     //MARK: - Атака врага
@@ -296,13 +294,15 @@ class GameScene: SKScene {
         let animationDuration: TimeInterval = 3
         
         var actionArray = [SKAction]()
-        
+        arrayShot.append(shot)
+        let walkAnimation = SKAction.animate(with: animationHadesShot,
+                                             timePerFrame: 0.07)
+        hades.run(walkAnimation)
         actionArray.append(SKAction.move(to: CGPoint(x: -self.frame.size.width, y: hades.position.y), duration: animationDuration))
         actionArray.append(SKAction.removeFromParent())
         
         shot.run(SKAction.sequence(actionArray))
     }
-    
     
     //MARK: - Движение зевса
     private func moveZeus(isZeus: Bool, zeus: SKSpriteNode, isDead: Bool, touches: Set<UITouch>) {
@@ -321,14 +321,32 @@ class GameScene: SKScene {
                 }
             }
         }
-
     }
-
 }
 
 //MARK: - SKSceneDelegate
 extension GameScene: SKSceneDelegate {
     override func update(_ currentTime: TimeInterval) {
+        if isZeusNodeOneDead {
+            zeusNodeOne.texture = SKTexture(imageNamed: NameImage.zeusDead.rawValue)
+        } else {
+            zeusNodeOne.texture = SKTexture(imageNamed: NameImage.zeusFirstPosition.rawValue)
+        }
+        if isZeusNodeTwoDead {
+            zeusNodeTwo.texture = SKTexture(imageNamed: NameImage.zeusDead.rawValue)
+        } else {
+            zeusNodeTwo.texture = SKTexture(imageNamed: NameImage.zeusFirstPosition.rawValue)
+        }
+        if isZeusNodeThreeDead {
+            zeusNodeThree.texture = SKTexture(imageNamed: NameImage.zeusDead.rawValue)
+        } else {
+            zeusNodeThree.texture = SKTexture(imageNamed: NameImage.zeusFirstPosition.rawValue)
+        }
+//        
+        for hades in arrayHadesDead {
+            hades.texture = SKTexture(imageNamed: NameImage.hadesDead.rawValue)
+        }
+
         if isEnd == false {
             if isDeadZeus {
                 switch nameDeadZeus {
@@ -360,6 +378,7 @@ extension GameScene: SKSceneDelegate {
                         arrayHadesActive[i].texture = SKTexture(imageNamed: NameImage.hadesDead.rawValue)
                         arrayHadesActive[i].size = CGSize(width: 50, height: 30)
                         arrayHadesActive[i].physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: 0, height: 0))
+                        arrayHadesDead.append(arrayHadesActive[i])
                         arrayHadesActive.remove(at: i)
                         break
                     }
@@ -374,17 +393,26 @@ extension GameScene: SKSceneDelegate {
                 for node in arrayNode {
                     node.removeFromParent()
                 }
+                for item in arrayShot {
+                    item.removeFromParent()
+                }
+                SKAction.removeFromParent()
+                self.removeAction(forKey: "forever")
             } else if arrayHadesActive.count == 0 {
                 MainRouter.shared.showWinOrLooseViewScreen(isWin: true)
                 isEnd = true
                 for node in arrayNode {
                     node.removeFromParent()
                 }
+                for item in arrayShot {
+                    item.removeFromParent()
+                }
+                self.removeAction(forKey: "forever")
+
+                SKAction.removeFromParent()
             }
         }
-//        //Проверка на победу
     }
-
 }
 
 //MARK: - SKPhysicsContactDelegate
