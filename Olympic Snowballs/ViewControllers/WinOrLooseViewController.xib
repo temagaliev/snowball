@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="22154" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina5_9" orientation="landscape" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22130"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="WinOrLooseViewController" customModule="Olympic_Snowballs" customModuleProvider="target">
+            <connections>
+                <outlet property="bgView" destination="fa1-c7-Bxr" id="azs-8v-jCH"/>
+                <outlet property="resultView" destination="eLh-q2-21H" id="kKa-35-eAg"/>
+                <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="i5M-Pr-FkT">
+            <rect key="frame" x="0.0" y="0.0" width="812" height="375"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="winBg" translatesAutoresizingMaskIntoConstraints="NO" id="fa1-c7-Bxr">
+                    <rect key="frame" x="0.0" y="0.0" width="812" height="375"/>
+                </imageView>
+                <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="winView" translatesAutoresizingMaskIntoConstraints="NO" id="eLh-q2-21H">
+                    <rect key="frame" x="291" y="112.66666666666669" width="230" height="150"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="150" id="DI5-Hm-lPO"/>
+                        <constraint firstAttribute="width" constant="230" id="L2z-W1-PEJ"/>
+                    </constraints>
+                </imageView>
+                <stackView opaque="NO" contentMode="scaleToFill" distribution="equalSpacing" spacing="16" translatesAutoresizingMaskIntoConstraints="NO" id="har-3M-nN7">
+                    <rect key="frame" x="348" y="278.66666666666669" width="116" height="50"/>
+                    <subviews>
+                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="pF3-YV-DpK">
+                            <rect key="frame" x="0.0" y="0.0" width="50" height="50"/>
+                            <constraints>
+                                <constraint firstAttribute="width" constant="50" id="Ray-EZ-ZZN"/>
+                                <constraint firstAttribute="height" constant="50" id="rKO-aZ-PSE"/>
+                            </constraints>
+                            <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                            <state key="normal" title="Button" image="menuButton"/>
+                            <connections>
+                                <action selector="onMenuButtonClick:" destination="-1" eventType="touchUpInside" id="RYc-lz-p8z"/>
+                            </connections>
+                        </button>
+                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="15b-dG-eE5">
+                            <rect key="frame" x="66" y="0.0" width="50" height="50"/>
+                            <constraints>
+                                <constraint firstAttribute="width" constant="50" id="C17-Uv-ybL"/>
+                                <constraint firstAttribute="height" constant="50" id="RU8-1x-f70"/>
+                            </constraints>
+                            <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                            <state key="normal" title="Button" image="replayButton"/>
+                            <connections>
+                                <action selector="onReplayButtonClick:" destination="-1" eventType="touchUpInside" id="sws-lN-hea"/>
+                            </connections>
+                        </button>
+                    </subviews>
+                </stackView>
+            </subviews>
+            <viewLayoutGuide key="safeArea" id="fnl-2z-Ty3"/>
+            <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+            <constraints>
+                <constraint firstItem="eLh-q2-21H" firstAttribute="centerY" secondItem="i5M-Pr-FkT" secondAttribute="centerY" id="DTa-vZ-Bau"/>
+                <constraint firstItem="fa1-c7-Bxr" firstAttribute="top" secondItem="fnl-2z-Ty3" secondAttribute="top" id="KOa-pW-hQw"/>
+                <constraint firstItem="har-3M-nN7" firstAttribute="centerX" secondItem="i5M-Pr-FkT" secondAttribute="centerX" id="Q6E-C2-cx6"/>
+                <constraint firstAttribute="bottom" secondItem="fa1-c7-Bxr" secondAttribute="bottom" id="S48-Ew-kQR"/>
+                <constraint firstItem="fa1-c7-Bxr" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" id="XAO-D6-tA1"/>
+                <constraint firstItem="eLh-q2-21H" firstAttribute="centerX" secondItem="i5M-Pr-FkT" secondAttribute="centerX" id="iht-LI-zhj"/>
+                <constraint firstItem="har-3M-nN7" firstAttribute="top" secondItem="eLh-q2-21H" secondAttribute="bottom" constant="16" id="mCO-0X-dSQ"/>
+                <constraint firstAttribute="trailing" secondItem="fa1-c7-Bxr" secondAttribute="trailing" id="mEm-0J-OiW"/>
+            </constraints>
+            <point key="canvasLocation" x="137.4384236453202" y="20"/>
+        </view>
+    </objects>
+    <resources>
+        <image name="menuButton" width="262" height="262"/>
+        <image name="replayButton" width="262" height="262"/>
+        <image name="winBg" width="4416" height="2484"/>
+        <image name="winView" width="1808" height="1263"/>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>
