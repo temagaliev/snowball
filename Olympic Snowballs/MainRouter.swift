@@ -43,8 +43,8 @@ final class MainRouter {
         rootViewController?.popViewController(animated: true)
     }
     
-    func showWinOrLooseViewScreen(isWin: Bool) {
-        rootViewController?.pushViewController(WinOrLooseViewController(isWin: isWin), animated: true)
+    func showWinOrLooseViewScreen(isWin: Bool, level: Int) {
+        rootViewController?.pushViewController(WinOrLooseViewController(isWin: isWin, level: level), animated: true)
     }
     
     func closeWinOrLooseViewScreen() {

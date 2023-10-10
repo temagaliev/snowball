@@ -34,6 +34,7 @@ class GameScene: SKScene {
     var nameDeadZeus: String = ""
     var nameDeadHades: String = ""
     var isEnd: Bool = false
+    var level: Int = 1
     
     let animationZeusShot: [SKTexture] = [SKTexture(imageNamed: NameImage.zeusFirstPosition.rawValue), SKTexture(imageNamed: NameImage.zeusSecondPosition.rawValue), SKTexture(imageNamed: NameImage.zeusThirdPosition.rawValue), SKTexture(imageNamed: NameImage.zeusFirstPosition.rawValue)]
     
@@ -82,15 +83,13 @@ class GameScene: SKScene {
         isZeusNodeThreeTouched = false
     }
     
+    //MARK: - Начало игры
     public func startGame() {
         createZueses()
-        createHades(numberOfHades: 3)
-        moveHades()
-
+        generateLevel()
     }
     
     //MARK: - Настройки зевса
- 
     private func createZueses() {
         
         zeusNodeOne.texture = SKTexture(imageNamed: NameImage.zeusFirstPosition.rawValue)
@@ -135,7 +134,7 @@ class GameScene: SKScene {
         isEnd = false
         arrayNode = []
         arrayHadesActive = []
-
+        arrayHadesDead = []
     }
     
     //MARK: - Создание врагов
@@ -163,33 +162,44 @@ class GameScene: SKScene {
     }
     
     //MARK: - Движение врагов
-    private func moveHades() {
+    private func moveHades(duration: TimeInterval, waitDuration: TimeInterval) {
         arrayHadesActive = arrayNode
-        let actionMain = SKAction.customAction(withDuration: 0) { _,_ in
+        let actionMain = SKAction.customAction(withDuration: 0) { [weak self] _,_ in
+            guard let self else { return }
             if self.arrayHadesActive.count != 0 {
                 let randonHades = Int.random(in: 0...self.arrayHadesActive.count - 1)
                 let hadesNode = self.arrayHadesActive[randonHades]
                 
-                let actionShot = SKAction.customAction(withDuration: 0, actionBlock: {_,_ in
-                    self.attackHades(hades: hadesNode)
+                let actionShot = SKAction.customAction(withDuration: 0, actionBlock: { _,_ in
+                    var isShot = true
+                    if self.arrayHadesDead.count != 0 {
+                        for item in self.arrayHadesDead {
+                            if item.name == hadesNode.name {
+                                isShot = false
+                            }
+                        }
+                        if isShot {
+                            self.attackHades(hades: hadesNode)
+                        } else {
+                            isShot = true
+                        }
+                    }
                 })
                 
                 let actionMove = SKAction.customAction(withDuration: 0) { node, _ in
                     let randomXPositionHades = CGFloat.random(in: (self.frame.maxX / 2 - 50)...(self.frame.maxX / 2 + 50))
                     let randomYPositionHades = CGFloat.random(in: (self.frame.minY / 2 - 70)...(self.frame.minY / 2 + 70))
                     
-                    let move = SKAction.move(to: CGPoint(x: randomXPositionHades, y: randomYPositionHades), duration: 0.3)
+                    let move = SKAction.move(to: CGPoint(x: randomXPositionHades, y: randomYPositionHades), duration: duration)
                     node.run(move)
-                    
                 }
-                let waitForViewAction = SKAction.wait(forDuration: 1)
+                let waitForViewAction = SKAction.wait(forDuration: waitDuration)
                 let sequance = SKAction.sequence([actionMove, waitForViewAction, actionShot,waitForViewAction])
                 
                 hadesNode.run(sequance)
-                
             }
         }
-        let waitForViewAction = SKAction.wait(forDuration: 1)
+        let waitForViewAction = SKAction.wait(forDuration: waitDuration)
         let sequance = SKAction.sequence([waitForViewAction, actionMain])
         
         self.run(SKAction.repeatForever(sequance), withKey: "forever")
@@ -201,7 +211,7 @@ class GameScene: SKScene {
         
         let zeusDefWall = SKSpriteNode(imageNamed: NameImage.wallDefZeus.rawValue)
         zeusDefWall.size = CGSize(width: 30, height: 30)
-        zeusDefWall.position = CGPoint(x: frame.minX / 2 + 100, y: frame.minY / 2 - 30)
+        zeusDefWall.position = CGPoint(x: frame.minX / 2 + 100, y: frame.minY / 2 - 40)
         zeusDefWall.physicsBody = SKPhysicsBody(rectangleOf: zeusDefWall.size)
         zeusDefWall.physicsBody?.affectedByGravity = false
         zeusDefWall.physicsBody?.isDynamic = false
@@ -214,7 +224,7 @@ class GameScene: SKScene {
         
         let hadesDefWall = SKSpriteNode(imageNamed: NameImage.wallDefHades.rawValue)
         hadesDefWall.size = CGSize(width: 30, height: 30)
-        hadesDefWall.position = CGPoint(x: frame.maxX / 2 - 100, y: frame.minY / 2 + 30)
+        hadesDefWall.position = CGPoint(x: frame.maxX / 2 - 100, y: frame.minY / 2 + 40)
         hadesDefWall.physicsBody = SKPhysicsBody(rectangleOf: hadesDefWall.size)
         hadesDefWall.physicsBody?.affectedByGravity = false
         hadesDefWall.physicsBody?.isDynamic = false
@@ -258,7 +268,7 @@ class GameScene: SKScene {
             
             let walkAnimation = SKAction.animate(with: animationZeusShot,
                                                  timePerFrame: 0.07)
-
+            arrayShot.append(shot)
             zeus.run(walkAnimation)
             actionArray.append(SKAction.move(to: CGPoint(x: self.frame.size.width, y: zeus.position.y), duration: animationDuration))
             actionArray.append(SKAction.removeFromParent())
@@ -311,7 +321,16 @@ class GameScene: SKScene {
                 if let touch = touches.first {
                     let touchLoc = touch.location(in: self)
                     let prevTouchLoc = touch.previousLocation(in: self)
-                    let location = touch.location(in: self)
+                    var location = touch.location(in: self)
+                    
+                    if location.x > 0 {
+                        location = CGPoint(x: 0, y: location.y)
+                    }
+                    
+                    if location.y > 0 {
+                        location = CGPoint(x: location.x, y: 0)
+                    }
+                    
                     let move = SKAction.move(to: location, duration: 0.1)
                     zeus.run(move)
                     let newYPos = zeus.position.y + (touchLoc.y - prevTouchLoc.y)
@@ -320,6 +339,53 @@ class GameScene: SKScene {
                     self.zeusMove = zeus
                 }
             }
+        }
+    }
+    //MARK: - Генерация уровней
+    private func generateLevel() {
+        print(level)
+        switch level {
+        case 1...3:
+            createHades(numberOfHades: 1)
+            moveHades(duration: 0.5, waitDuration: 2)
+        case 4...9:
+            createHades(numberOfHades: 2)
+            moveHades(duration: 0.5, waitDuration: 2)
+        case 10...15:
+            createHades(numberOfHades: 3)
+            moveHades(duration: 0.3, waitDuration: 1)
+        case 16...20:
+            createHades(numberOfHades: 3)
+            moveHades(duration: 0.3, waitDuration: 1)
+        case 21...25:
+            createHades(numberOfHades: 4)
+            moveHades(duration: 0.3, waitDuration: 1)
+        case 26...30:
+            createHades(numberOfHades: 5)
+            moveHades(duration: 0.3, waitDuration: 1)
+        case 31...35:
+            createHades(numberOfHades: 6)
+            moveHades(duration: 0.3, waitDuration: 1)
+        case 36...40:
+            createHades(numberOfHades: 7)
+            moveHades(duration: 0.3, waitDuration: 1)
+        case 41...80:
+            createHades(numberOfHades: 3)
+            moveHades(duration: 0.15, waitDuration: 0.5)
+        case 81...150:
+            createHades(numberOfHades: 4)
+            moveHades(duration: 0.15, waitDuration: 0.5)
+        case 151...350:
+            createHades(numberOfHades: 5)
+            moveHades(duration: 0.15, waitDuration: 0.5)
+        case 351...1000:
+            createHades(numberOfHades: 6)
+            moveHades(duration: 0.15, waitDuration: 0.5)
+        case 1001...10000:
+            createHades(numberOfHades: 6)
+            moveHades(duration: 0.15, waitDuration: 0.5)
+        default:
+            print("error in generate")
         }
     }
 }
@@ -342,7 +408,7 @@ extension GameScene: SKSceneDelegate {
         } else {
             zeusNodeThree.texture = SKTexture(imageNamed: NameImage.zeusFirstPosition.rawValue)
         }
-//        
+
         for hades in arrayHadesDead {
             hades.texture = SKTexture(imageNamed: NameImage.hadesDead.rawValue)
         }
@@ -370,7 +436,6 @@ extension GameScene: SKSceneDelegate {
                 }
                 isDeadZeus = false
                 nameDeadZeus = ""
-                
             }
             if isDeadHades {
                 for i in 0...arrayHadesActive.count - 1 {
@@ -388,28 +453,50 @@ extension GameScene: SKSceneDelegate {
                 
             }
             if isZeusNodeOneDead && isZeusNodeTwoDead && isZeusNodeThreeDead && arrayHadesActive.count != 0 {
-                MainRouter.shared.showWinOrLooseViewScreen(isWin: false)
                 isEnd = true
-                for node in arrayNode {
-                    node.removeFromParent()
-                }
+    
                 for item in arrayShot {
                     item.removeFromParent()
                 }
                 SKAction.removeFromParent()
                 self.removeAction(forKey: "forever")
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1), execute: { [weak self] in
+                    guard let self = self else { return }
+                    MainRouter.shared.showWinOrLooseViewScreen(isWin: false, level: self.level)
+                    level = 1
+                    for node in self.arrayNode {
+                        node.removeFromParent()
+                    }
+                    if arrayShot.count != 0 {
+                        for item in arrayShot {
+                            item.removeFromParent()
+                        }
+                    }
+                })
             } else if arrayHadesActive.count == 0 {
-                MainRouter.shared.showWinOrLooseViewScreen(isWin: true)
                 isEnd = true
-                for node in arrayNode {
-                    node.removeFromParent()
-                }
+
                 for item in arrayShot {
                     item.removeFromParent()
                 }
+                
                 self.removeAction(forKey: "forever")
-
                 SKAction.removeFromParent()
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1), execute: { [weak self] in
+                    guard let self = self else { return }
+                    MainRouter.shared.showWinOrLooseViewScreen(isWin: true, level: level)
+                    level = level + 1
+                    for node in arrayNode {
+                        node.removeFromParent()
+                    }
+                    if arrayShot.count != 0 {
+                        for item in arrayShot {
+                            item.removeFromParent()
+                        }
+                    }
+                })
             }
         }
     }
@@ -472,6 +559,5 @@ extension GameScene: SKPhysicsContactDelegate {
         if bodyA == wallHades && bodyB == hadesGun {
             contact.bodyB.node?.removeFromParent()
         }
-
     }
 }
