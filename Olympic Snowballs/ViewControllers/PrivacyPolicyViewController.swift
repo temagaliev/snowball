@@ -11,7 +11,13 @@ import WebKit
 class PrivacyPolicyViewController: UIViewController, WKNavigationDelegate {
     
     var webView: WKWebView!
-    let clouseBarButtonItem = UIBarButtonItem(barButtonSystemItem: .close, target: PrivacyPolicyViewController.self, action: #selector(closeAction))
+    
+    let backButton: UIButton = {
+        let button = UIButton()
+        button.setImage(UIImage(named: NameImage.menuButton.rawValue), for: .normal)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
     
     override func loadView() {
         webView = WKWebView()
@@ -27,10 +33,18 @@ class PrivacyPolicyViewController: UIViewController, WKNavigationDelegate {
         webView.load(URLRequest(url: url))
         webView.allowsBackForwardNavigationGestures = true
         
-        navigationItem.rightBarButtonItem = clouseBarButtonItem
+        
+        backButton.addTarget(self, action: #selector(onBackButtonClick), for: .touchUpInside)
+        
+        view.addSubview(backButton)
+        
+        backButton.widthAnchor.constraint(equalToConstant: 50).isActive = true
+        backButton.heightAnchor.constraint(equalToConstant: 50).isActive = true
+        backButton.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor, constant: 16).isActive = true
+        backButton.leftAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leftAnchor, constant: 16).isActive = true
     }
     
-    @objc func closeAction() {
+    @objc func onBackButtonClick() {
         MainRouter.shared.closeTermsViewScreen()
     }
 }
